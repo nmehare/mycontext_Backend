@@ -1,8 +1,11 @@
 const User = require('../models/users');
+const Patient = require('../models/patient');
 var mongoose = require('mongoose');
+var user = mongoose.model('User');
+var patient = mongoose.model('Patient');
 const express = require('express');
 const router = express.Router();
-var user = mongoose.model('User');
+
 
 router.post('/login', function (req, res) {
     console.log('inside login methorrrrrrrrrrrrd');
@@ -29,13 +32,17 @@ router.post('/login', function (req, res) {
 router.get('/getall', (req, res) => {
     res.json({"message": "You are Smart."});
 });
-// gets posts from database
-router.get('/reports', function(req, res, next) {
-    Post.find(function(err, reports){
+
+// gets  patientDetails from database
+router.get('/patients', function(req, res, next) {
+    console.log("inside getallpeatientsapi");
+    patient.find(function(err, patientDetails){
       if(err){ return next(err); }
-      res.json(reports);
+      res.json(patientDetails);
     });
   });
+
+  
 
 router.post('/registration', (req, res, next) => {
     console.log("Inside register functionnn");
@@ -59,6 +66,35 @@ router.post('/registration', (req, res, next) => {
         } else {
 
             console.log("inside elseeeeeeee block");
+        }
+        return res.json({})
+    });
+});
+
+
+
+router.post('/createpatient', (req, res, next) => {
+    console.log("Inside create patient functionnn");
+    console.log(req.body.name);
+    console.log(req.body.addressline1);
+    console.log(req.body.addressline2);
+    if (!req.body.name || !req.body.addressline1) {
+        return res.status(400).json({
+            message: 'Please fill out all fields'
+        });
+    }
+    var patient = new Patient();
+    patient.name = req.body.name;
+    patient.addressline1 = req.body.addressline1;
+    patient.phone = req.body.phone;
+    patient.addressline2 = req.body.addressline2;
+   // user.setPassword(req.body.password)
+   patient.save(function (err) {
+        if (err) {
+            return next(err);
+        } else {
+
+            console.log("inside elseeeeeeee create ptient block");
         }
         return res.json({})
     });
