@@ -1,8 +1,12 @@
 const User = require('../models/users');
 const Patient = require('../models/patient');
+const Report = require('../models/report');
+const Hospital = require('../models/hospital');
 var mongoose = require('mongoose');
 var user = mongoose.model('User');
 var patient = mongoose.model('Patient');
+var report = mongoose.model('Report');
+var hospital = mongoose.model('Hospital');
 const express = require('express');
 const router = express.Router();
 
@@ -41,6 +45,40 @@ router.get('/patients', function(req, res, next) {
       res.json(patientDetails);
     });
   });
+
+  // gets  medical report details from database
+router.get('/reports', function(req, res, next) {
+    console.log("inside getallreports method");
+    report.find(function(err, reportDetails){
+      if(err){ return next(err); }
+      res.json(reportDetails);
+    });
+  });
+
+  
+router.post('/createreport', (req, res, next) => {
+    console.log("Inside create report functionnn");
+   
+    if (!req.body.name || !req.body.addressline1) {
+        return res.status(400).json({
+            message: 'Please fill out all fields'
+        });
+    }
+    var report = new Report(req.body);
+    //report.reporttype = req.body.reporttype;
+   // report.reportdate = req.body.reportdate;
+    //report.price = req.body.price;
+   // report.diagnosis = req.body.diagnosis;
+    report.save(function (err) {
+        if (err) {
+            return next(err);
+        } else {
+
+            console.log("inside elseeeeeeee create report block");
+        }
+        return res.json({})
+    });
+});
 
   
 
