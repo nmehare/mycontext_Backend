@@ -67,6 +67,7 @@ router.post('/createreport', (req, res, next) => {
     var report = new Report(req.body);
     //report.reporttype = req.body.reporttype;
    // report.reportdate = req.body.reportdate;
+   
     //report.price = req.body.price;
    // report.diagnosis = req.body.diagnosis;
     report.save(function (err) {

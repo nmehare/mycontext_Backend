@@ -6,13 +6,14 @@ var cors = require('cors');
 var cookieParser = require('cookie-parser');
 var path = require('path');
 var routes = require('./routes/users');
+
 // create express app
 const app = express();
 app.use(cors());
 //app.use(favicon(__dirname + '/public/images/favicon.ico'));
 app.use(bodyParser.json());//bodyparser so that we can pass json data to this app
 //app.use(cors());//enable cors server and client running on diffrent port 
-app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 //app.use(express.static(path.join(__dirname, 'dist')));
 // parse requests of content-type - application/x-www-form-urlencoded
