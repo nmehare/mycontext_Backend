@@ -46,9 +46,9 @@ router.get('/patients', function(req, res, next) {
 
 router.post('/registration', (req, res, next) => {
     console.log("Inside register functionnn");
-    console.log(req.body.username);
-    console.log(req.body.password);
-    console.log(req.body.email);
+   // console.log(req.body.username);
+   // console.log(req.body.password);
+    //console.log(req.body.email);
     if (!req.body.username || !req.body.password) {
         return res.status(400).json({
             message: 'Please fill out all fields'
@@ -67,8 +67,10 @@ router.post('/registration', (req, res, next) => {
     user.dob = req.body.dob;
     user.bloodtype = req.body.bloodtype;
     user.gender = req.body.gender;
+    console.log(req.get('formType'));
     user.usertype = req.body.formType;
-   
+    console.log(req.body.formType);
+    
    // user.setPassword(req.body.password)
     user.save(function (err) {
         if (err) {
