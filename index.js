@@ -1,4 +1,5 @@
 const express = require('express');
+var PORT = process.env.PORT || 3000 ;
 const bodyParser = require('body-parser');
 const users = require('./routes/users');
 var cors = require('cors');
@@ -39,7 +40,7 @@ mongoose.connect(dbConfig.url, {
 //app.use('/api/users', users);
 app.use('/', routes);
 // listen for requests
-app.listen(3000, () => {
+app.listen(PORT, () => {
     console.log("Server is listening on port 3000");
 });
 
