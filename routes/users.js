@@ -67,9 +67,12 @@ router.post('/registration', (req, res, next) => {
     user.dob = req.body.dob;
     user.bloodtype = req.body.bloodtype;
     user.gender = req.body.gender;
-    console.log(req.get('formType'));
-    user.usertype = req.body.formType;
-    console.log(req.body.formType);
+    
+    user.usertype = req.body.usertype;
+    console.log(req.body.usertype);
+
+  //  user.usertype = req.body.usertype;
+   // console.log(req.body.usertype);
     
    // user.setPassword(req.body.password)
     user.save(function (err) {
@@ -79,7 +82,7 @@ router.post('/registration', (req, res, next) => {
 
             console.log("inside elseeeeeeee block");
         }
-        return res.json({})
+        return res.json(true);
     });
 });
 
