@@ -55,10 +55,20 @@ router.post('/registration', (req, res, next) => {
         });
     }
     var user = new User();
-    user.email = req.body.email;
     user.username = req.body.username;
-   // user.phone = req.body.phone;
     user.password = req.body.password;
+    
+    user.name = req.body.name;
+    user.address = req.body.address;
+    user.email = req.body.email;
+    user.contact = req.body.contact;
+
+    user.abn = req.body.abn;
+    user.dob = req.body.dob;
+    user.bloodtype = req.body.bloodtype;
+    user.gender = req.body.gender;
+    user.usertype = req.body.formType;
+   
    // user.setPassword(req.body.password)
     user.save(function (err) {
         if (err) {
