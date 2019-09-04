@@ -46,6 +46,15 @@ router.get('/patients', function(req, res, next) {
     });
   });
 
+  // gets  patientDetails from database
+router.get('/patients1', function(req, res, next) {
+    console.log("inside getallpeatientsapi");
+    patient.find(function(err, patientDetails){
+      if(err){ return next(err); }
+      res.json(patientDetails);
+    });
+  });
+
   // gets  medical report details from database
 router.get('/reports', function(req, res, next) {
     console.log("inside getallreports method");
@@ -67,7 +76,7 @@ router.post('/createreport', (req, res, next) => {
     var report = new Report(req.body);
     //report.reporttype = req.body.reporttype;
    // report.reportdate = req.body.reportdate;
-   
+
     //report.price = req.body.price;
    // report.diagnosis = req.body.diagnosis;
     report.save(function (err) {
