@@ -46,14 +46,7 @@ router.get('/patients', function(req, res, next) {
     });
   });
 
-  // gets  patientDetails from database
-router.get('/patients1', function(req, res, next) {
-    console.log("inside getallpeatientsapi");
-    patient.find(function(err, patientDetails){
-      if(err){ return next(err); }
-      res.json(patientDetails);
-    });
-  });
+
 
   // gets  medical report details from database
 router.get('/reports', function(req, res, next) {
