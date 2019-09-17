@@ -13,31 +13,31 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true
-    },
-    phone: {
-        type: Number
-    },
-    email: {
-        type: String,
-    },
-    address: {
-        type: String
-    },
-    dob: {
-        type: Date
-    },
-    gender: {
-        type: String
-    },
-    name: {
-        type: String
-    },
-    abn: {
-        type: String
-    },
-    bloodtype: {
-        type: String
     }
+    // phone: {
+    //     type: Number
+    // },
+    // email: {
+    //     type: String,
+    // },
+    // address: {
+    //     type: String
+    // },
+    // dob: {
+    //     type: Date
+    // },
+    // gender: {
+    //     type: String
+    // },
+    // name: {
+    //     type: String
+    // },
+    // abn: {
+    //     type: String
+    // },
+    // bloodtype: {
+    //     type: String
+    // }
 });
 
 module.exports = mongoose.model('User', UserSchema);

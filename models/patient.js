@@ -2,15 +2,15 @@
 var mongoose = require('mongoose');
 
 var PatientSchema = new mongoose.Schema({
-  firstName: { type: String, required:true},
-  lastName: { type: String, required:true},
-  dob: { type: Date, default: Date.now },
-  bloodtype: { type: Date, default: Date.now },
-  addressLine1: {type: String},
-  addressLine2: {type: String},
-  email: String,
-  phone: Number,
-  gender:String
+    name: {type:String, trim:true, default:''},
+    dob: {type:Date},
+    address: {type:String, trim:true, default:''},
+    email: {type:String, trim:true, default:''},
+    contactNumber: {type:Number, default:0},
+    gender : {type:String, trim:true, default:''},
+    bloodType : {type:String, trim:true, default:''},
+    cancerType: {type:String, trim:true, default:''},
+    userId: {type:String}
 });
 
 module.exports = mongoose.model('Patient', PatientSchema);

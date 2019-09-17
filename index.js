@@ -6,7 +6,7 @@ var cors = require('cors');
 var cookieParser = require('cookie-parser');
 var path = require('path');
 var routes = require('./routes/users');
-
+//npm run dev----------------------run using this command
 // create express app
 const app = express();
 app.use(cors());
