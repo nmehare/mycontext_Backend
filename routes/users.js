@@ -27,7 +27,7 @@ router.post('/login', function (req, res) {
             message: 'Please fill out all fields'
         });
     }
- //Cannot set headers after they are sent to the client
+    //Cannot set headers after they are sent to the client
 
     // patient.findOne({
     //     'userId': '5d804618bf99f504fc7a1ff7'
@@ -48,45 +48,42 @@ router.post('/login', function (req, res) {
                 console.log('inside patient method');
                 patient.findOne({
                     'userId': doc._id
-                }).populate('userId').exec(function(err,response){
+                }).populate('userId').exec(function (err, response) {
                     if (err) {
                         return next(err);
-                    }
-                    else{
-                    console.log(response);
-                    return res.send(response);
+                    } else {
+                        console.log(response);
+                        return res.send(response);
                     }
                 });
             } else if (doc.usertype == "hospital") {
                 console.log('inside hospital method');
                 hospital.findOne({
                     'userId': doc._id
-                }).populate('userId').exec(function(err,response){
+                }).populate('userId').exec(function (err, response) {
                     if (err) {
                         return next(err);
-                    }
-                    else{
-                    console.log(response);
-                    return res.send(response);
+                    } else {
+                        console.log(response);
+                        return res.send(response);
                     }
                 });
             } else if (doc.usertype == "buyer") {
                 buyer.findOne({
                     'userId': doc._id
-                }).populate('userId').exec(function(err,response){
+                }).populate('userId').exec(function (err, response) {
                     if (err) {
                         return next(err);
-                    }
-                    else{
-                    console.log(response);
-                    return res.send(response);
+                    } else {
+                        console.log(response);
+                        return res.send(response);
                     }
                 });
             }
         }
     })
 
-    
+
 });
 
 router.post('/registration', (req, res, next) => {
@@ -112,10 +109,10 @@ router.post('/registration', (req, res, next) => {
         if (err) {
             return next(err);
         } else {
-            console.log("inside elseeeeeeee block");
+            return res.json({
+                message: "User inserted"
+            }).status(200);
         }
-        return res.json("Inserted record to user table");
-
     });
 
     console.log(id);
@@ -140,9 +137,10 @@ router.post('/registration', (req, res, next) => {
             if (err) {
                 return next(err);
             } else {
-                console.log("inside elseeeeeeee block");
+                return res.json({
+                    message: "patient inserted"
+                }).status(200);
             }
-            return res.json("Inserted record to Patient");
         });
     } else if (user.usertype == "hospital") {
         var hospital = new Hospital();
@@ -156,9 +154,10 @@ router.post('/registration', (req, res, next) => {
             if (err) {
                 return next(err);
             } else {
-                console.log("inside elseeeeeeee block");
+                return res.json({
+                    message: "hospital inserted"
+                }).status(200);
             }
-            return res.json("Inserted record to Hospital");
         });
     } else if (user.usertype == "buyer") {
         var buyer = new Buyer();
@@ -172,12 +171,12 @@ router.post('/registration', (req, res, next) => {
             if (err) {
                 return next(err);
             } else {
-                console.log("inside elseeeeeeee block");
+                return res.json({
+                    message: "buyer inserted"
+                }).status(200);
             }
-            return res.json("Inserted record to Buyer");
         });
     }
-
     //user.setPassword(req.body.password)
 
 });
@@ -262,11 +261,12 @@ router.get('/reportbybuyer/:buyerid', function (req, res, next) {
                         console.log(reportDetails);
                         reportarray.push(reportDetails);
                         console.log(reportarray);
-                    }
+                    }                   
                 });
             });
             console.log(reportarray);
-            res.send(reportarray);
+            return res.send(reportarray);
+            //res.send(reportarray);
             console.log("xzczc");
         }
     });
@@ -283,6 +283,7 @@ router.put('/updatereport/:reportid', (req, res) => {
         _id: req.param("reportid")
     }, {
         reporttype: req.body.reporttype,
+        reportdate: req.body.reportdate,
         price: req.body.price,
         diagnosis: req.body.diagnosis,
         patient: req.body.patient,
@@ -501,6 +502,24 @@ router.get('/reportbyhospital/:hospitalid', function (req, res, next) {
     });
 });
 
+// get all medical reports details filtered by report id from database
+router.get('/reports/:reportId', function (req, res, next) {
+
+    console.log("inside getallreportsbyreportId method");
+    report.find({
+        _id: req.param("reportId")
+    }, function (err, reportdetails) {
+        if (err) {
+            return next(err);
+        } else {
+
+            res.send(reportdetails);
+
+        }
+
+    });
+});
+
 // get all medical reports details filtered by hospital from database
 router.get('/reportbypatient/:patientid', function (req, res, next) {
 
@@ -530,69 +549,83 @@ router.get('/reportbybuyer1/:buyerid', function (req, res, next) {
         if (err) {
             return next(err);
         } else {
-            agreementDetails.forEach(function (agreementDetails) {
-                console.log(agreementDetails.report);
-                report.findOne({
-                    _id: agreementDetails.report
-                }, function (err, reportDetails) {
-                    if (err) {
-                        return next(err);
-                    } else {
-                        console.log(reportDetails);
-                        reportarray.push(reportDetails);
-                        console.log(reportarray);
-                    }
-                });
+            console.log(" console.log(agreementDetails);  " + agreementDetails);
+            console.log(agreementDetails.report);
+            report.find({
+                'report': agreementDetails.report
+            }).exec((err, company) => {
+                if (err) {
+                    return res.status(500).json(err);
+                } else if (!company) {
+                    return res.status(404).json(); // Only this runs.
+                } else {
+                    console.log(company);
+                    return res.status(200).json(company);
+                }
             });
-            console.log(reportarray);
-            
-            res.send(reportarray);
             console.log("xzczc");
         }
     });
 });
 
-function findInDb(id, callback){
+
+findInDb().then(function(collection) {
+    // This function will be called afte getdb() will be executed. 
+ 
+ }).fail(function(err){
+     // If Error accrued. 
+ 
+ });
+
+function findInDb(id, callback) {
     var reportarray = [];
-    agreement.find(id, function(err, agreementDetails){
-      if(err){ return callback(err) };
-      agreementDetails.forEach(function (agreementDetails) {
-        console.log(agreementDetails.report);
-        report.findOne({
-            _id: agreementDetails.report
-        }, function (err, reportDetails) {
-            if (err) {
-                return next(err);
-            } else {
-                console.log(reportDetails);
-                reportarray.push(reportDetails);
-                console.log(reportarray);
-            }
+    agreement.find(id, function (err, agreementDetails) {
+        if (err) {
+            return callback(err)
+        };
+        agreementDetails.forEach(function (agreementDetails) {
+            console.log(agreementDetails.report);
+            report.findOne({
+                _id: agreementDetails.report
+            }, function (err, reportDetails) {
+                if (err) {
+                    return next(err);
+                } else {
+                    //console.log(reportDetails);
+                    reportarray.push(reportDetails);
+                    console.log(reportarray);
+                }
+            });
         });
-    });
-    console.log(reportarray);
-    //res.send(reportarray);
-    console.log("xzczc");
+        return reportarray;
+        //console.log(reportarray);
+        //res.send(reportarray);
+       // console.log("xzczc");
 
-      //var obj = JSON.parse(data)[0] // or something
-      callback(null, reportarray)
+        //var obj = JSON.parse(data)[0] // or something
+        //callback(null, reportarray)
     });
-  };
+};
 
-  router.get('/reportbybuyer2/:buyerid', function (req, res, next) {
-    findInDb( {
+router.get('/reportbybuyer2/:buyerid', function (req, res, next) {
+    findInDb({
         buyer: req.param("buyerid")
-    }, function(err, obj){
-      if(err){ return next(err) };
-      res.myObj = obj;
-      next();
+    }, function (err, obj) {
+        if (err) {
+            return next(err)
+        };
+        res.myObj = obj;
+        console.log("-------------------");
+       // console.log("I am resppppppppppp"+ res.myObj + "I am doneeeee");
+        //res.status(200).json(res.myObj);
+        next();
     });
-  });
+});
 
-  router.get('/', function(req, res){
+router.get('/', function (req, res) {
     // By now the first middleware executed
     res.status(200).json(res.myObject);
-  });
+});
 
 //blockchain API's
 router.get('/blockchainapi/medicalrecords', (req, res, next) => {
