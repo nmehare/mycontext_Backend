@@ -10,7 +10,7 @@ var PatientSchema = new mongoose.Schema({
     gender : {type:String, trim:true, default:''},
     bloodType : {type:String, trim:true, default:''},
     cancerType: {type:String, trim:true, default:''},
-    userId: {type:String}
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 });
 
 module.exports = mongoose.model('Patient', PatientSchema);

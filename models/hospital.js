@@ -19,9 +19,7 @@ var HospitalSchema = new mongoose.Schema({
   abn: {
     type: String
   },
-  userId: {
-    type: String
-  }
+  userId:  { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 });
 
 module.exports = mongoose.model('Hospital', HospitalSchema);

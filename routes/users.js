@@ -4,7 +4,7 @@ const Report = require('../models/report');
 const Hospital = require('../models/hospital');
 const Agreement = require('../models/agreement');
 const Buyer = require('../models/buyer');
-//var nodemon = require('nodemon');
+var nodemon = require('nodemon');
 var mongoose = require('mongoose');
 var user = mongoose.model('User');
 var patient = mongoose.model('Patient');
@@ -27,6 +27,14 @@ router.post('/login', function (req, res) {
             message: 'Please fill out all fields'
         });
     }
+ //Cannot set headers after they are sent to the client
+
+    // patient.findOne({
+    //     'userId': '5d804618bf99f504fc7a1ff7'
+    // }).populate('userId').exec(function(err,response){
+    //     console.log('inside populate');
+    //     console.log(response);
+    // });
 
     user.findOne({
         'username': req.body.username,
@@ -36,10 +44,49 @@ router.post('/login', function (req, res) {
             throw new Error('No record found.');
             console.log(doc);
         } else {
-            console.log('inside elseeeeeee');
-            res.send(doc);
+            if (doc.usertype == "patient") {
+                console.log('inside patient method');
+                patient.findOne({
+                    'userId': doc._id
+                }).populate('userId').exec(function(err,response){
+                    if (err) {
+                        return next(err);
+                    }
+                    else{
+                    console.log(response);
+                    return res.send(response);
+                    }
+                });
+            } else if (doc.usertype == "hospital") {
+                console.log('inside hospital method');
+                hospital.findOne({
+                    'userId': doc._id
+                }).populate('userId').exec(function(err,response){
+                    if (err) {
+                        return next(err);
+                    }
+                    else{
+                    console.log(response);
+                    return res.send(response);
+                    }
+                });
+            } else if (doc.usertype == "buyer") {
+                buyer.findOne({
+                    'userId': doc._id
+                }).populate('userId').exec(function(err,response){
+                    if (err) {
+                        return next(err);
+                    }
+                    else{
+                    console.log(response);
+                    return res.send(response);
+                    }
+                });
+            }
         }
     })
+
+    
 });
 
 router.post('/registration', (req, res, next) => {
@@ -498,52 +545,54 @@ router.get('/reportbybuyer1/:buyerid', function (req, res, next) {
                 });
             });
             console.log(reportarray);
+            
             res.send(reportarray);
             console.log("xzczc");
         }
     });
 });
 
-function findInDb(id, callback) {
+function findInDb(id, callback){
     var reportarray = [];
-    agreement.find(id, function (err, agreementDetails) {
-        if (err) {
-            return callback(err)
-        };
-        agreementDetails.forEach(function (agreementDetails) {
-            console.log(agreementDetails.report);
-            report.findOne({
-                _id: agreementDetails.report
-            }, function (err, reportDetails) {
-                if (err) {
-                    return next(err);
-                } else {
-                    console.log(reportDetails);
-                    reportarray.push(reportDetails);
-                    console.log(reportarray);
-                }
-            });
+    agreement.find(id, function(err, agreementDetails){
+      if(err){ return callback(err) };
+      agreementDetails.forEach(function (agreementDetails) {
+        console.log(agreementDetails.report);
+        report.findOne({
+            _id: agreementDetails.report
+        }, function (err, reportDetails) {
+            if (err) {
+                return next(err);
+            } else {
+                console.log(reportDetails);
+                reportarray.push(reportDetails);
+                console.log(reportarray);
+            }
         });
-        console.log(reportarray);
-        //res.send(reportarray);
-        console.log("xzczc");
-
-        //var obj = JSON.parse(data)[0] // or something
-        callback(null, reportarray)
     });
-};
+    console.log(reportarray);
+    //res.send(reportarray);
+    console.log("xzczc");
 
-router.get('/reportbybuyer2/:buyerid', function (req, res, next) {
-    findInDb({
+      //var obj = JSON.parse(data)[0] // or something
+      callback(null, reportarray)
+    });
+  };
+
+  router.get('/reportbybuyer2/:buyerid', function (req, res, next) {
+    findInDb( {
         buyer: req.param("buyerid")
-    }, function (err, obj) {
-        if (err) {
-            return next(err)
-        };
-        res.myObj = obj;
-        next();
+    }, function(err, obj){
+      if(err){ return next(err) };
+      res.myObj = obj;
+      next();
     });
-});
+  });
+
+  router.get('/', function(req, res){
+    // By now the first middleware executed
+    res.status(200).json(res.myObject);
+  });
 
 //blockchain API's
 router.get('/blockchainapi/medicalrecords', (req, res, next) => {
