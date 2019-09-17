@@ -4,7 +4,7 @@ const Report = require('../models/report');
 const Hospital = require('../models/hospital');
 const Agreement = require('../models/agreement');
 const Buyer = require('../models/buyer');
-var nodemon = require('nodemon');
+//var nodemon = require('nodemon');
 var mongoose = require('mongoose');
 var user = mongoose.model('User');
 var patient = mongoose.model('Patient');
@@ -543,11 +543,6 @@ router.get('/reportbybuyer2/:buyerid', function (req, res, next) {
         res.myObj = obj;
         next();
     });
-});
-
-router.get('/', function (req, res) {
-    // By now the first middleware executed
-    res.status(200).json(res.myObject);
 });
 
 //blockchain API's
