@@ -109,9 +109,9 @@ router.post('/registration', (req, res, next) => {
         if (err) {
             return next(err);
         } else {
-            return res.json({
-                message: "User inserted"
-            }).status(200);
+            //return res.json({
+                console.log("User inserted");
+            //}).status(200);
         }
     });
 
@@ -265,7 +265,7 @@ router.get('/reportbybuyer/:buyerid', function (req, res, next) {
                 });
             });
             console.log(reportarray);
-            return res.send(reportarray);
+            res.send(reportarray);
             //res.send(reportarray);
             console.log("xzczc");
         }
@@ -296,6 +296,7 @@ router.put('/updatereport/:reportid', (req, res) => {
                     message: "error"
                 });
         } else {
+            
             res.send({
                 message: "report updated"
             }).status(200);
@@ -409,14 +410,67 @@ router.get('/agreementbybuyer/:buyerid', function (req, res, next) {
     });
 });
 
+
+router.post('/createbuyer', (req, res, next) => {
+    console.log("Inside create hospital functionnn");
+    if (!req.body.name) {
+        return res.status(400).json({
+            message: 'Please fill out all fields'
+        });
+    }
+    var buyer = new Buyer(req.body);
+    var buyerId= buyer._id;
+    buyer.save(function (err, data) {
+        if (err) {
+            res
+                .status(400)
+                .send({
+                    message: "error"
+                });
+        } else {
+            console.log("inside elseeeeeeee create hospital block");
+
+            request.post(
+                {
+                  headers: { "content-type": "application/json" },
+                  url: blockchainConfig.url + "/org.example.biznet.Buyer",
+                  body: JSON.stringify({
+                    $class: "org.example.biznet.Buyer",
+                    "buyerId": buyerId,
+                    "name": req.body.name,
+                    "abn": req.body.abn
+                  })
+            }, (error, response, body) => {
+                if (error) {
+                    console.log("buyer Insertion FAILED To Blockchain.");
+                   // res.json({
+                        success: false
+                       // message: "record failed."
+                      //});
+                }
+               // res.json({
+                    success: true
+                    console.log("buyer Added To Blockchain successfully.")
+                 //   message: "Patient Added To Blockchain successfully."
+                  //});
+            });
+
+            res.send({
+                message: "buyer created"
+            }).status(200);
+        }
+    });
+});
+
 router.post('/createhospital', (req, res, next) => {
     console.log("Inside create hospital functionnn");
-    if (!req.body.hospitalname || !req.body.address) {
+    if (!req.body.name) {
         return res.status(400).json({
             message: 'Please fill out all fields'
         });
     }
     var hospital = new Hospital(req.body);
+    var hospitalId= hospital._id;
     hospital.save(function (err, data) {
         if (err) {
             res
@@ -426,6 +480,33 @@ router.post('/createhospital', (req, res, next) => {
                 });
         } else {
             console.log("inside elseeeeeeee create hospital block");
+
+            request.post(
+                {
+                  headers: { "content-type": "application/json" },
+                  url: blockchainConfig.url + "/org.example.biznet.Hospital",
+                  body: JSON.stringify({
+                    $class: "org.example.biznet.Hospital",
+                    "hospitalId": hospitalId,
+                    "name": req.body.name,
+                    "address": req.body.address,
+                    "abn": req.body.abn
+                  })
+            }, (error, response, body) => {
+                if (error) {
+                    console.log("Hospital Insertion FAILED To Blockchain.");
+                   // res.json({
+                        success: false
+                       // message: "record failed."
+                      //});
+                }
+               // res.json({
+                    success: true
+                    console.log("Hospital Added To Blockchain successfully.")
+                 //   message: "Patient Added To Blockchain successfully."
+                  //});
+            });
+
             res.send({
                 message: "hospital created"
             }).status(200);
@@ -441,6 +522,7 @@ router.post('/createreport', (req, res, next) => {
         });
     }
     var report = new Report(req.body);
+    var recordId  = report._id;
     report.save(function (err, data) {
         if (err) {
             res
@@ -450,6 +532,35 @@ router.post('/createreport', (req, res, next) => {
                 });
         } else {
             console.log("inside elseeeeeeee create report block");
+            request.post(
+                {
+                  headers: { "content-type": "application/json" },
+                  url: blockchainConfig.url + "/org.example.biznet.MedicalRecord",
+                  body: JSON.stringify({
+                    $class: "org.example.biznet.MedicalRecord",
+                    "recordId": recordId,
+                    "description": req.body.diagnosis,
+                    "cancerType": req.body.cancertype,
+                    "medicalHistory": req.body.reporttype,
+                    "patientIdd": req.body.patient,
+                    "hospitalIdd": req.body.hospital
+                  })
+            }, (error, response, body) => {
+                if (error) {
+                    console.log("MedicalRecord Insertion FAILED To Blockchain.");
+                   // res.json({
+                        success: false
+                       // message: "record failed."
+                      //});
+                }
+               // res.json({
+                    success: true
+                    console.log("MedicalRecord Added To Blockchain successfully.")
+                 //   message: "Patient Added To Blockchain successfully."
+                  //});
+            });
+
+            console.log(data);
             res.send({
                 message: "report created"
             }).status(200);
@@ -462,12 +573,13 @@ router.post('/createreport', (req, res, next) => {
 router.post('/createpatient', (req, res, next) => {
     console.log("Inside create patient functionnn");
     console.log(req.body.firstName);
-    if (!req.body.firstName || !req.body.lastName) {
+    if (!req.body.name) {
         return res.status(400).json({
             message: 'Please fill out all fields'
         });
     }
     var patient = new Patient(req.body);
+    var id = patient._id;
     patient.save(function (err, data) {
         if (err) {
             res
@@ -476,7 +588,35 @@ router.post('/createpatient', (req, res, next) => {
                     message: "error"
                 });
         } else {
-            console.log("inside elseeeeeeee create patient block");
+            console.log("inside elseeeeeeee create patient block"+id);
+                request.post(
+                    {
+                      headers: { "content-type": "application/json" },
+                      url: blockchainConfig.url + "/org.example.biznet.Patient",
+                      body: JSON.stringify({
+                        $class: "org.example.biznet.Patient",
+                        "patientId": id,
+                        "name": req.body.name,
+                        "bloodtype": req.body.bloodtype,
+                        "cancertype": req.body.cancertype,
+                        "contactnumber": req.body.contact,
+                        "email": req.body.email
+                      })
+                }, (error, response, body) => {
+                    if (error) {
+                        console.log("Patient Insertion FAILED To Blockchain.");
+                       // res.json({
+                            success: false
+                           // message: "record failed."
+                          //});
+                    }
+                   // res.json({
+                        success: true
+                        console.log("Patient Added To Blockchain successfully.")
+                     //   message: "Patient Added To Blockchain successfully."
+                      //});
+                });
+            
             res.send({
                 message: "patient created"
             }).status(200);
@@ -676,21 +816,31 @@ router.get('/blockchainapi/buyers', (req, res, next) => {
 //     "contactnumber": "string",
 //     "email": "string"
 //   }
-router.post('/blockchainapi/createpatient', (req, res, next) => {    
-    request(blockchainConfig.url + '/org.example.biznet.Patient', function (error, res, body) { 
-       // res.setHeader('Content-Type', 'application/json');
-        if (!error && res.statusCode == 200) {
-            data = {
-                "$class": "org.example.biznet.Patient",
-                "patientId": "pp3",
-                "name": "tstpatient",
-                "bloodtype": "bloodtype",
-                "cancertype": "skin",
-                "contactnumber": "34345",
-                "email": "test@gmail.com"
-            };
-            res.json(data);
+router.post('/blockchainapi/createpatient', (req, res, next) => {
+    request.post(
+        {
+          headers: { "content-type": "application/json" },
+          url: blockchainConfig.url + "/org.example.biznet.Patient",
+          body: JSON.stringify({
+            $class: "org.example.biznet.Patient",
+            "patientId": "pp4",
+            "name": "tstpa3tient",
+            "bloodtype": "blood3type",
+            "cancertype": "s3kin",
+            "contactnumber": "344345",
+            "email": "test@gma3il.com"
+          })
+    }, (error, response, body) => {
+        if (error) {
+            res.json({
+                success: false,
+                message: "record failed."
+              });
         }
+        res.json({
+            success: true,
+            message: "Patient Added To Blockchain successfully."
+          });
     });
 });
 
@@ -705,18 +855,6 @@ router.post('/blockchainapi/createrecord', (req, res, next) => {
                 "firstName": patient.name,
                 "lastName": patient.lastName
             }));
-
-            // {
-            //     "$class": "org.example.biznet.MedicalRecord",
-            //     "recordId": "r1",
-            //     "description": "desc",
-            //     "cancerType": "skin",
-            //     "medicalHistory": "history",
-            //     "buyers": [],
-            //     "patientIdd": "string",
-            //     "hospitalIdd": "string"
-            //   }
-            //res.send(body);
         }
     });
 });
