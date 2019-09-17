@@ -14,7 +14,7 @@ var agreement = mongoose.model('Agreement');
 var buyer = mongoose.model('Buyer');
 const express = require('express');
 var request = require('request');
-var fs = require("fs");
+var async = require("async");
 const blockchainConfig = require('../config/blockchain.config.js');
 const router = express.Router();
 
@@ -261,7 +261,7 @@ router.get('/reportbybuyer/:buyerid', function (req, res, next) {
                         console.log(reportDetails);
                         reportarray.push(reportDetails);
                         console.log(reportarray);
-                    }                   
+                    }
                 });
             });
             console.log(reportarray);
@@ -520,6 +520,24 @@ router.get('/reports/:reportId', function (req, res, next) {
     });
 });
 
+// get all medical reports details filtered by report id from database
+router.get('/agreements/:agreementId', function (req, res, next) {
+
+    console.log("inside getallagreementsbyagreementId method");
+    agreement.find({
+        _id: req.param("reporagreementIdtId")
+    }, function (err, agreementdetails) {
+        if (err) {
+            return next(err);
+        } else {
+
+            res.send(agreementdetails);
+
+        }
+
+    });
+});
+
 // get all medical reports details filtered by hospital from database
 router.get('/reportbypatient/:patientid', function (req, res, next) {
 
@@ -569,13 +587,6 @@ router.get('/reportbybuyer1/:buyerid', function (req, res, next) {
 });
 
 
-findInDb().then(function(collection) {
-    // This function will be called afte getdb() will be executed. 
- 
- }).fail(function(err){
-     // If Error accrued. 
- 
- });
 
 function findInDb(id, callback) {
     var reportarray = [];
@@ -585,6 +596,7 @@ function findInDb(id, callback) {
         };
         agreementDetails.forEach(function (agreementDetails) {
             console.log(agreementDetails.report);
+
             report.findOne({
                 _id: agreementDetails.report
             }, function (err, reportDetails) {
@@ -593,14 +605,14 @@ function findInDb(id, callback) {
                 } else {
                     //console.log(reportDetails);
                     reportarray.push(reportDetails);
-                    console.log(reportarray);
+                    // console.log(reportarray);
                 }
             });
         });
         return reportarray;
         //console.log(reportarray);
         //res.send(reportarray);
-       // console.log("xzczc");
+        // console.log("xzczc");
 
         //var obj = JSON.parse(data)[0] // or something
         //callback(null, reportarray)
@@ -608,23 +620,24 @@ function findInDb(id, callback) {
 };
 
 router.get('/reportbybuyer2/:buyerid', function (req, res, next) {
-    findInDb({
-        buyer: req.param("buyerid")
-    }, function (err, obj) {
-        if (err) {
-            return next(err)
-        };
-        res.myObj = obj;
-        console.log("-------------------");
-       // console.log("I am resppppppppppp"+ res.myObj + "I am doneeeee");
-        //res.status(200).json(res.myObj);
-        next();
-    });
-});
 
-router.get('/', function (req, res) {
-    // By now the first middleware executed
-    res.status(200).json(res.myObject);
+    async.series([
+            function (callback) {
+                findInDb({
+                    buyer: req.param("buyerid")
+                }, callback);
+            }
+        ],
+        function (err, results) {
+            if (err) {
+                res.status(500).send('something went wrong');
+            } else {
+                if (results && results.length > 1) {
+                    res.status(200).send(results)
+                }
+            }
+        }
+    )
 });
 
 //blockchain API's
@@ -654,29 +667,58 @@ router.get('/blockchainapi/buyers', (req, res, next) => {
 
 //POST Methods
 
-router.post('/blockchainapi/createpatient', (req, res, next) => {
-    request(blockchainConfig.url + '/org.example.biznet.Patient', function (error, res, body) {
+// {
+//     "$class": "org.example.biznet.Patient",
+//     "patientId": "string",
+//     "name": "string",
+//     "bloodtype": "string",
+//     "cancertype": "string",
+//     "contactnumber": "string",
+//     "email": "string"
+//   }
+router.post('/blockchainapi/createpatient', (req, res, next) => {    
+    request(blockchainConfig.url + '/org.example.biznet.Patient', function (error, res, body) { 
+       // res.setHeader('Content-Type', 'application/json');
+        if (!error && res.statusCode == 200) {
+            data = {
+                "$class": "org.example.biznet.Patient",
+                "patientId": "pp3",
+                "name": "tstpatient",
+                "bloodtype": "bloodtype",
+                "cancertype": "skin",
+                "contactnumber": "34345",
+                "email": "test@gmail.com"
+            };
+            res.json(data);
+        }
+    });
+});
+
+
+router.post('/blockchainapi/createrecord', (req, res, next) => {
+    request(blockchainConfig.url + '/org.example.biznet.MedicalRecord', function (error, res, body) {
         res.setHeader('Content-Type', 'application/json');
         if (!error && res.statusCode == 200) {
             res.send(JSON.stringify({
-                "$class": "org.example.biznet.Patient",
+                "$class": "org.example.biznet.MedicalRecord",
                 "patientId": "pp1",
                 "firstName": patient.name,
                 "lastName": patient.lastName
             }));
+
+            // {
+            //     "$class": "org.example.biznet.MedicalRecord",
+            //     "recordId": "r1",
+            //     "description": "desc",
+            //     "cancerType": "skin",
+            //     "medicalHistory": "history",
+            //     "buyers": [],
+            //     "patientIdd": "string",
+            //     "hospitalIdd": "string"
+            //   }
             //res.send(body);
         }
     });
 });
 
-// router.post('http://18.191.129.98:3000/api/org.example.biznet.Patient', (req, res, next) => {
-//     res.setHeader('Content-Type', 'application/json');
-//     res.json(JSON.stringify({
-//         "$class": "org.example.biznet.Patient",
-//         "patientId": "pp1",
-//         "firstName": patient.firstName,
-//         "lastName": patient.lastName
-//     }));
-//     // res.send();
-// });
 module.exports = router;
