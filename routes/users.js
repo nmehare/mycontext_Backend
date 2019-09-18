@@ -124,7 +124,7 @@ router.post('/registration', (req, res, next) => {
 
     if (user.usertype == "patient") {
         var patient = new Patient();
-        var id = patient._id;
+        var patientId = patient._id;
         patient.name = name;
         patient.email = email;
         patient.address = address;
@@ -144,7 +144,7 @@ router.post('/registration', (req, res, next) => {
                       url: blockchainConfig.url + "/org.example.biznet.Patient",
                       body: JSON.stringify({
                         $class: "org.example.biznet.Patient",
-                        "patientId": id,
+                        "patientId": patientId,
                         "name": req.body.name,
                         "bloodtype": req.body.bloodtype,
                         "cancertype": req.body.cancertype,
