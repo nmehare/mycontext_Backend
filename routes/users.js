@@ -124,6 +124,7 @@ router.post('/registration', (req, res, next) => {
 
     if (user.usertype == "patient") {
         var patient = new Patient();
+        var id = patient._id;
         patient.name = name;
         patient.email = email;
         patient.address = address;
@@ -137,6 +138,33 @@ router.post('/registration', (req, res, next) => {
             if (err) {
                 return next(err);
             } else {
+                request.post(
+                    {
+                      headers: { "content-type": "application/json" },
+                      url: blockchainConfig.url + "/org.example.biznet.Patient",
+                      body: JSON.stringify({
+                        $class: "org.example.biznet.Patient",
+                        "patientId": id,
+                        "name": req.body.name,
+                        "bloodtype": req.body.bloodtype,
+                        "cancertype": req.body.cancertype,
+                        "contactnumber": req.body.contact,
+                        "email": req.body.email
+                      })
+                }, (error, response, body) => {
+                    if (error) {
+                        console.log("Patient Insertion FAILED To Blockchain.");
+                       // res.json({
+                            success: false
+                           // message: "record failed."
+                          //});
+                    }
+                   // res.json({
+                        success: true
+                        console.log("Patient Added To Blockchain successfully.")
+                     //   message: "Patient Added To Blockchain successfully."
+                      //});
+                });
                 return res.json({
                     message: "patient inserted"
                 }).status(200);
@@ -144,6 +172,7 @@ router.post('/registration', (req, res, next) => {
         });
     } else if (user.usertype == "hospital") {
         var hospital = new Hospital();
+        var hospitalId = hospital._id;
         hospital.name = name;
         hospital.email = email;
         hospital.address = address;
@@ -154,6 +183,33 @@ router.post('/registration', (req, res, next) => {
             if (err) {
                 return next(err);
             } else {
+
+                request.post(
+                    {
+                      headers: { "content-type": "application/json" },
+                      url: blockchainConfig.url + "/org.example.biznet.Hospital",
+                      body: JSON.stringify({
+                        $class: "org.example.biznet.Hospital",
+                        "hospitalId": hospitalId,
+                        "name": req.body.name,
+                        "address": req.body.address,
+                        "abn": req.body.abn
+                      })
+                }, (error, response, body) => {
+                    if (error) {
+                        console.log("Hospital Insertion FAILED To Blockchain.");
+                       // res.json({
+                            success: false
+                           // message: "record failed."
+                          //});
+                    }
+                   // res.json({
+                        success: true
+                        console.log("Hospital Added To Blockchain successfully.")
+                     //   message: "Patient Added To Blockchain successfully."
+                      //});
+                });
+    
                 return res.json({
                     message: "hospital inserted"
                 }).status(200);
@@ -161,6 +217,7 @@ router.post('/registration', (req, res, next) => {
         });
     } else if (user.usertype == "buyer") {
         var buyer = new Buyer();
+        var buyerId = buyer._id;
         buyer.name = name;
         buyer.email = email;
         buyer.address = address;
@@ -171,6 +228,32 @@ router.post('/registration', (req, res, next) => {
             if (err) {
                 return next(err);
             } else {
+
+                request.post(
+                    {
+                      headers: { "content-type": "application/json" },
+                      url: blockchainConfig.url + "/org.example.biznet.Buyer",
+                      body: JSON.stringify({
+                        $class: "org.example.biznet.Buyer",
+                        "buyerId": buyerId,
+                        "name": req.body.name,
+                        "abn": req.body.abn
+                      })
+                }, (error, response, body) => {
+                    if (error) {
+                        console.log("buyer Insertion FAILED To Blockchain.");
+                       // res.json({
+                            success: false
+                           // message: "record failed."
+                          //});
+                    }
+                   // res.json({
+                        success: true
+                        console.log("buyer Added To Blockchain successfully.")
+                     //   message: "Patient Added To Blockchain successfully."
+                      //});
+                });
+    
                 return res.json({
                     message: "buyer inserted"
                 }).status(200);
@@ -242,35 +325,88 @@ router.get('/agreements', function (req, res, next) {
 
 // get all medical reports details filtered by buyer from database
 router.get('/reportbybuyer/:buyerid', function (req, res, next) {
-    var reportarray = [];
+   
     console.log("inside getallreportsbybuyer method");
-    agreement.find({
-        buyer: req.param("buyerid")
-    }, function (err, agreementDetails) {
+    agreement.find(
+        {buyer: req.param("buyerid")}
+        , function (err, agreementDetails) {
         if (err) {
             return next(err);
-        } else {
-            agreementDetails.forEach(function (agreementDetails) {
-                console.log(agreementDetails.report);
-                report.findOne({
-                    _id: agreementDetails.report
-                }, function (err, reportDetails) {
-                    if (err) {
-                        return next(err);
-                    } else {
-                        console.log(reportDetails);
-                        reportarray.push(reportDetails);
-                        console.log(reportarray);
-                    }
-                });
-            });
-            console.log(reportarray);
-            res.send(reportarray);
-            //res.send(reportarray);
-            console.log("xzczc");
+        }else{
+            reportarray=[];
+            getreport(res,agreementDetails,0);
+        //    for(var i=0,len=agreementDetails.length;i<len;i++){
+            // console.log(agreementDetails[i].report);
+            // await report.findOne(
+            //     {_id: agreementDetails[i].report}
+            //     ,  function (err, reportDetails) {
+            //      if (err) {
+            //         return next(err);
+            //     }else{
+            //         console.log(reportDetails);
+            //         reportarray.push(reportDetails);
+                   
+                   
+            //     }
+               
+            // });
+            // if(reportarray.length==len){
+            //     console.log("inside");
+            //     callback(res,reportarray);
+            // }
         }
+            // agreementDetails.forEach( function(agreementDetails){
+            //     console.log(agreementDetails.report);
+            //     report.findOne(
+            //         {_id: agreementDetails.report}
+            //         ,function (err, reportDetails) {
+            //         if (err) {
+            //             return next(err);
+            //         }else{
+            //             console.log(reportDetails);
+            //             reportarray.push(reportDetails);
+            //             console.log(reportarray);
+            //         }
+                   
+            //     });
+                
+            //  });
+             
+        
+       
     });
 });
+var reportarray = [];
+ 
+async function getreport(res,agreementDetails,i){
+   
+   try{
+    console.log(agreementDetails[i].report);
+   
+    await report.findOne(
+        {_id: agreementDetails[i].report}
+        ,  function (err, reportDetails) {
+         if (err) {
+            return next(err);
+        }else{
+            console.log(reportDetails);
+            reportarray.push(reportDetails);     
+           
+        }
+        getreport(res,agreementDetails,i+1);
+    });
+    
+}catch(e){
+    callback(res,reportarray);
+   }
+}
+ 
+function callback(res,reportarray){
+ 
+    console.log(reportarray);
+    res.send(reportarray);
+    console.log("xzczc");
+}
 
 
 router.put('/updatereport/:reportid', (req, res) => {
