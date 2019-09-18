@@ -293,8 +293,6 @@ router.get('/users', function (req, res, next) {
 // get all medical reports details from database
 router.get('/reports', function (req, res, next) {
     console.log("inside getallreports method");
-
-
     report.find().populate('patient').populate('hospital').exec(function (err, response) {
         if (err) {
             return next(err);
@@ -418,6 +416,52 @@ async function getreport(res, agreementDetails, i) {
                 reportarray.push(reportDetails);
             }
             getreport(res, agreementDetails, i + 1);
+        });
+    } catch (e) {
+        callback(res, reportarray);
+    }
+}
+
+function callback(res, reportarray) {
+
+    console.log(reportarray);
+    res.send(reportarray);
+    console.log("xzczc");
+}
+
+
+// get all medical reports details filtered by buyer from database
+router.get('/getagreementbypatient/:patientid', function (req, res, next) {
+    console.log("inside getallreportsbypatient method"+req.param("patientid"));
+    console.log(req.param("patientid"));
+    report.find({
+        patient: req.param("patientid")
+    }, function (err, reportDetails) {
+        if (err) {
+            return next(err);
+        } else {
+            array = [];
+            console.log(reportDetails);
+            console.log("__________________");
+            getPatientData(res, reportDetails, 0);
+        }
+    });
+});
+var reportarray = [];
+
+async function getPatientData(res, reportDetails, i) {
+    try {
+        console.log(reportDetails[i]._id);
+        await agreement.findOne({
+            report: reportDetails[i]._id
+        }).populate('buyer').populate('report').exec(function (err, agreementDetails) {
+            if (err) {
+                return next(err);
+            } else {
+                console.log(agreementDetails);
+                reportarray.push(agreementDetails);
+            }
+            getPatientData(res, reportDetails, i + 1);
         });
     } catch (e) {
         callback(res, reportarray);
