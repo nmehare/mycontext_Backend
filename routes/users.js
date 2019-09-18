@@ -398,19 +398,27 @@ async function getreport(res, agreementDetails, i) {
     try {
         console.log(agreementDetails[i].report);
 
+
+        // report.find().populate('patient').populate('hospital').exec(function (err, response) {
+        //     if (err) {
+        //         return next(err);
+        //     } else {
+        //         console.log(response);
+        //         return res.send(response);
+        //     }
+        // });
+
         await report.findOne({
             _id: agreementDetails[i].report
-        }, function (err, reportDetails) {
+        }).populate('patient').populate('hospital').exec(function (err, reportDetails) {
             if (err) {
                 return next(err);
             } else {
                 console.log(reportDetails);
                 reportarray.push(reportDetails);
-
             }
             getreport(res, agreementDetails, i + 1);
         });
-
     } catch (e) {
         callback(res, reportarray);
     }
