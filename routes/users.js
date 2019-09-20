@@ -464,8 +464,11 @@ async function getPatientData(res, reportDetails, i) {
                 return next(err);
             } else {
                 //console.log(agreementDetails);
-                if (agreementDetails != null)
-                    patientarray.push(agreementDetails);
+                if (agreementDetails != null){
+                    for(let x=0;x<agreementDetails.length;x++)
+                    patientarray.push(agreementDetails[x]);
+                }
+                    //patientarray.push(agreementDetails);
             }
             getPatientData(res, reportDetails, i + 1);
         });
