@@ -413,6 +413,7 @@ async function getreport(res, agreementDetails, i) {
                 return next(err);
             } else {
                 console.log(reportDetails);
+                if(reportDetails != null)
                 reportarray.push(reportDetails);
             }
             getreport(res, agreementDetails, i + 1);
@@ -447,11 +448,13 @@ router.get('/getagreementbypatient/:patientid', function (req, res, next) {
         }
     });
 });
-var patientarray = [];
 
+var patientarray = [];
 async function getPatientData(res, reportDetails, i) {
+    
     try {
         console.log(reportDetails[i]._id);
+        
         await agreement.findOne({
             report: reportDetails[i]._id
         }).populate('buyer').populate('report').exec(function (err, agreementDetails) {
@@ -466,6 +469,7 @@ async function getPatientData(res, reportDetails, i) {
         });
     } catch (e) {
         callback(res, patientarray);
+        patientarray.length=0;
     }
 }
 
