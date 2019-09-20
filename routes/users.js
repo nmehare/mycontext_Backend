@@ -413,8 +413,8 @@ async function getreport(res, agreementDetails, i) {
                 return next(err);
             } else {
                 console.log(reportDetails);
-                if(reportDetails != null)
-                reportarray.push(reportDetails);
+                if (reportDetails != null)
+                    reportarray.push(reportDetails);
             }
             getreport(res, agreementDetails, i + 1);
         });
@@ -433,7 +433,7 @@ function callback(res, reportarray) {
 
 // get all medical reports details filtered by buyer from database
 router.get('/getagreementbypatient/:patientid', function (req, res, next) {
-    console.log("inside getallreportsbypatient method"+req.param("patientid"));
+    console.log("inside getallreportsbypatient method" + req.param("patientid"));
     console.log(req.param("patientid"));
     report.find({
         patient: req.param("patientid")
@@ -442,8 +442,8 @@ router.get('/getagreementbypatient/:patientid', function (req, res, next) {
             return next(err);
         } else {
             array = [];
-            console.log(reportDetails);
-            console.log("__________________");
+           console.log(reportDetails);
+           // console.log("__________________");
             getPatientData(res, reportDetails, 0);
         }
     });
@@ -451,33 +451,35 @@ router.get('/getagreementbypatient/:patientid', function (req, res, next) {
 
 var patientarray = [];
 async function getPatientData(res, reportDetails, i) {
-    
+    var allPatientAgreement=[];
     try {
-        console.log(reportDetails[i]._id);
-        
-        await agreement.findOne({
+        for(let i =0;i<reportDetails.length;i++){
+            
+        }
+        //console.log("report iddddd"+reportDetails[i]._id);
+        await agreement.find({
             report: reportDetails[i]._id
         }).populate('buyer').populate('report').exec(function (err, agreementDetails) {
             if (err) {
                 return next(err);
             } else {
-                console.log(agreementDetails);
-                if(agreementDetails != null)
-                patientarray.push(agreementDetails);
+                //console.log(agreementDetails);
+                if (agreementDetails != null)
+                    patientarray.push(agreementDetails);
             }
             getPatientData(res, reportDetails, i + 1);
         });
     } catch (e) {
         callback(res, patientarray);
-        patientarray.length=0;
+        patientarray.length = 0;
     }
 }
 
 function callback(res, patientarray) {
 
-    console.log(patientarray);
+    //console.log(patientarray);
     res.send(patientarray);
-    console.log("xzczc");
+    //console.log("xzczc");
 }
 
 
@@ -840,25 +842,22 @@ router.post('/createpatient', (req, res, next) => {
 
 // get all medical reports details filtered by hospital from database
 router.get('/reportbyhospital/:hospitalid', function (req, res, next) {
-
     console.log("inside getallreportsbyhospital method");
+
     report.find({
         hospital: req.param("hospitalid")
-    }, function (err, reportdetails) {
+    }).populate('hospital').exec(function (err, hospitaldetails) {
         if (err) {
             return next(err);
         } else {
-
-            res.send(reportdetails);
-
+            console.log(hospitaldetails);
+            return res.send(hospitaldetails);
         }
-
     });
 });
 
 // get all medical reports details filtered by report id from database
 router.get('/reports/:reportId', function (req, res, next) {
-
     console.log("inside getallreportsbyreportId method");
     report.find({
         _id: req.param("reportId")
@@ -866,18 +865,15 @@ router.get('/reports/:reportId', function (req, res, next) {
         if (err) {
             return next(err);
         } else {
-
             res.send(reportdetails);
-
         }
-
     });
 });
 
 
 
 // get all medical reports details filtered by report id from database
-router.get('/getAllReportsNoAgreement', function (req, res, next) {
+router.get('/getAllReportsNoAgreement/:buyerId', function (req, res, next) {
     console.log("inside getallreportsbybuyerId method");
     report.find({
         buyer: null
@@ -912,17 +908,16 @@ router.get('/agreements/:agreementId', function (req, res, next) {
 router.get('/reportbypatient/:patientid', function (req, res, next) {
 
     console.log("inside getallreportsbypatient method");
+
     report.find({
         patient: req.param("patientid")
-    }, function (err, reportdetails) {
+    }).populate('hospital').exec(function (err, reportdetails) {
         if (err) {
             return next(err);
         } else {
-
-            res.send(reportdetails);
-
+            console.log(reportdetails);
+            return res.send(reportdetails);
         }
-
     });
 });
 
