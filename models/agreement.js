@@ -5,6 +5,7 @@ var AgreementSchema = new mongoose.Schema({
   requestDate: { type: Date, default: Date.now },
   buyer: { type: mongoose.Schema.Types.ObjectId, ref: 'Buyer' },
   report: { type: mongoose.Schema.Types.ObjectId, ref: 'Report' }
+  //patients: { type: mongoose.Schema.Types.ObjectId, ref: 'Patient' }
 });
 
 module.exports = mongoose.model('Agreement', AgreementSchema);

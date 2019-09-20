@@ -447,7 +447,7 @@ router.get('/getagreementbypatient/:patientid', function (req, res, next) {
         }
     });
 });
-var reportarray = [];
+var patientarray = [];
 
 async function getPatientData(res, reportDetails, i) {
     try {
@@ -459,19 +459,20 @@ async function getPatientData(res, reportDetails, i) {
                 return next(err);
             } else {
                 console.log(agreementDetails);
-                reportarray.push(agreementDetails);
+                if(agreementDetails != null)
+                patientarray.push(agreementDetails);
             }
             getPatientData(res, reportDetails, i + 1);
         });
     } catch (e) {
-        callback(res, reportarray);
+        callback(res, patientarray);
     }
 }
 
-function callback(res, reportarray) {
+function callback(res, patientarray) {
 
-    console.log(reportarray);
-    res.send(reportarray);
+    console.log(patientarray);
+    res.send(patientarray);
     console.log("xzczc");
 }
 
@@ -598,17 +599,19 @@ router.delete('/deleteagreement/:agreementid', (req, res) => {
         });
 });
 
-// get all agreements  details of the buyer from database
+// get all agreements  details of the buyer from database ///parag give hospital from report
 router.get('/agreementbybuyer/:buyerid', function (req, res, next) {
     var reportarray = [];
     console.log("inside getallagreementbybuyer method");
+
     agreement.find({
         buyer: req.param("buyerid")
-    }, function (err, agreementDetails) {
+    }).populate('report').exec(function (err, agreementDetails) {
         if (err) {
             return next(err);
         } else {
-            res.send(agreementDetails);
+            console.log(agreementDetails);
+            return res.send(agreementDetails);
         }
     });
 });
@@ -864,6 +867,22 @@ router.get('/reports/:reportId', function (req, res, next) {
 
         }
 
+    });
+});
+
+
+
+// get all medical reports details filtered by report id from database
+router.get('/getAllReportsNoAgreement', function (req, res, next) {
+    console.log("inside getallreportsbybuyerId method");
+    report.find({
+        buyer: null
+    }, function (err, reportdetails) {
+        if (err) {
+            return next(err);
+        } else {
+            res.send(reportdetails);
+        }
     });
 });
 
