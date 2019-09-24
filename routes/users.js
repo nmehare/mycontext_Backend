@@ -491,7 +491,7 @@ router.get('/getMedicalTransaction/:buyerid', function (req, res, next) {
     console.log(req.param("buyerid"));
     report.find({
         //patient: req.param("buyerid")
-    }, function (err, reportDetails) {
+    }).populate('patient').populate('hospital').exec(function (err, reportDetails) {
         if (err) {
             return next(err);
         } else {
