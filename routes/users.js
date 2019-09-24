@@ -424,7 +424,6 @@ async function getreport(res, agreementDetails, i) {
 }
 
 function callback(res, reportarray) {
-
     console.log(reportarray);
     res.send(reportarray);
     console.log("xzczc");
@@ -442,8 +441,8 @@ router.get('/getagreementbypatient/:patientid', function (req, res, next) {
             return next(err);
         } else {
             array = [];
-           console.log(reportDetails);
-           // console.log("__________________");
+            console.log(reportDetails);
+            // console.log("__________________");
             getPatientData(res, reportDetails, 0);
         }
     });
@@ -451,10 +450,10 @@ router.get('/getagreementbypatient/:patientid', function (req, res, next) {
 
 var patientarray = [];
 async function getPatientData(res, reportDetails, i) {
-    var allPatientAgreement=[];
+    var allPatientAgreement = [];
     try {
-        for(let i =0;i<reportDetails.length;i++){
-            
+        for (let i = 0; i < reportDetails.length; i++) {
+
         }
         //console.log("report iddddd"+reportDetails[i]._id);
         await agreement.find({
@@ -464,11 +463,11 @@ async function getPatientData(res, reportDetails, i) {
                 return next(err);
             } else {
                 //console.log(agreementDetails);
-                if (agreementDetails != null){
-                    for(let x=0;x<agreementDetails.length;x++)
-                    patientarray.push(agreementDetails[x]);
+                if (agreementDetails != null) {
+                    for (let x = 0; x < agreementDetails.length; x++)
+                        patientarray.push(agreementDetails[x]);
                 }
-                    //patientarray.push(agreementDetails);
+                //patientarray.push(agreementDetails);
             }
             getPatientData(res, reportDetails, i + 1);
         });
@@ -485,6 +484,134 @@ function callback(res, patientarray) {
     //console.log("xzczc");
 }
 
+
+// parag get all medical reports details filtered by buyer from database
+router.get('/getMedicalTransaction/:buyerid', function (req, res, next) {
+    console.log("inside getallreportsbypatient method" + req.param("buyerid"));
+    console.log(req.param("buyerid"));
+    report.find({
+        //patient: req.param("buyerid")
+    }, function (err, reportDetails) {
+        if (err) {
+            return next(err);
+        } else {
+            array = [];
+            //console.log(reportDetails);
+            // console.log("__________________");
+            getBuyeragreementData(res, reportDetails, req.param("buyerid"));
+        }
+    });
+});
+
+
+async function getBuyeragreementData(res, reportDetails, buyerId) {
+    var allTransaction = [];
+    var dontwant = [];
+    var matchedRecords = [];
+    var z = 0;
+    console.log(buyerId);
+    try {
+
+        //console.log("report iddddd"+reportDetails[i]._id);
+        await agreement.find({
+            buyer: buyerId
+        }).populate('buyer').populate('report').exec(function (err, allBuyerAgreement) {
+            if (err) {
+                return next(err);
+            } else {
+                //console.log(agreementDetails);
+                if (allBuyerAgreement != null) {
+
+                    console.log("agreement total" + allBuyerAgreement.length);
+                    console.log("report total" + reportDetails.length);
+                    for (let x = 0; x < allBuyerAgreement.length; x++) {
+                        for (let y = 0; y < reportDetails.length; y++) {
+                            console.log("agreement report id " + allBuyerAgreement[x].report._id);
+                            console.log("report id" + reportDetails[y]._id);
+                            if (allBuyerAgreement[x].report._id.toString().trim() == reportDetails[y]._id.toString().trim()) {
+                                console.log("MATCH!!!!!");
+                                matchedRecords.push(reportDetails[y]);
+                            } else {
+                                console.log("MATCH NOT FOUND!!!!!");
+
+                                // if (z == 0) {
+                                //     dontwant.push(reportDetails[y]);
+                                //     console.log(dontwant.length);
+                                //     console.log("not in array-ADD first element");
+                                //     z++;
+                                // } else if (z >= 1) {
+                                //     //for (let z = 0; z < dontwant.length; z++) {
+                                //     if (dontwant.includes(reportDetails[y])) {
+                                //         console.log("already in array//////////");
+                                //     } else {
+                                //         dontwant.push(reportDetails[y]);
+                                //         console.log("not in array");
+                                //         z++;
+                                //     }
+                                // }
+
+
+
+
+                            }
+                        }
+                    }
+                }
+            }
+            //console.log(dontwant.length);
+            console.log(matchedRecords.length);
+            allTransaction = reportDetails.filter((item) => !matchedRecords.includes(item));
+            console.log(allTransaction.length)
+            // console.log("Remaining reports: "+allTransaction.length);
+            callback1(res, allTransaction);
+            allTransaction.length = 0;
+            //getBuyeragreementData(res, reportDetails,buyerId);
+        });
+    } catch (e) {
+        callback1(res, allTransaction);
+        allTransaction.length = 0;
+    }
+}
+
+function callback1(res, allTransaction) {
+
+    //console.log(patientarray);
+    res.send(allTransaction);
+    //console.log("xzczc");
+}
+
+
+
+router.put('/updatereport1/:reportid', (req, res) => {
+    if (!req.body.reporttype || !req.body.price) {
+        return res.status(400).json({
+            message: 'Please fill out all fields'
+        });
+    }
+    report.updateOne({
+        _id: req.param("reportid")
+    }, {
+        reporttype: req.body.reporttype,
+        reportdate: req.body.reportdate,
+        price: req.body.price,
+        diagnosis: req.body.diagnosis,
+        patient: req.body.patient,
+        hospital: req.body.hospital
+    }, function (err, data) {
+        if (err) {
+            res
+                .status(400)
+                .send({
+                    message: "error"
+                });
+        } else {
+
+            res.send({
+                message: "report updated"
+            }).status(200);
+        }
+    });
+});
 
 router.put('/updatereport/:reportid', (req, res) => {
     if (!req.body.reporttype || !req.body.price) {
@@ -509,6 +636,35 @@ router.put('/updatereport/:reportid', (req, res) => {
                     message: "error"
                 });
         } else {
+            request.put({
+                headers: {
+                    "content-type": "application/json"
+                },
+                url: blockchainConfig.url + "/org.example.biznet.MedicalRecord/" + req.param("reportid"),
+                body: JSON.stringify({
+                    $class: "org.example.biznet.MedicalRecord",
+                    "description": req.body.diagnosis,
+                    "cancerType": req.body.cancertype,
+                    "medicalHistory": req.body.reporttype,
+                    "patientIdd": req.body.patient,
+                    "hospitalIdd": req.body.hospital,
+                    "buyers": req.body.buyers
+                })
+            }, (error, response, body) => {
+                if (error) {
+                    console.log("MedicalRecord update FAILED To Blockchain.");
+                    // res.json({
+                    success: false
+                    // message: "record failed."
+                    //});
+                }
+                // res.json({
+                success: true
+                console.log("MedicalRecord updated IN  Blockchain successfully.")
+                //   message: "Patient Added To Blockchain successfully."
+                //});
+            });
+
 
             res.send({
                 message: "report updated"
@@ -560,7 +716,34 @@ router.post('/createagreement', (req, res, next) => {
     });
 });
 
+router.post('/logout', function (req, res) {
+    console.log(req.body.username);
+    if(!req.body.username){
+      return res.status(400).json({message: 'Please provide name'});
+    }
+    
+    user.findOne({
+        'username': req.body.username
+    }).then(function (doc) {
+        if (!doc) {
+            throw new Error('No record found.');
+            console.log(doc);
+        } else {
+            const user = {
+                _id: doc._id,
+                name: doc.name,
+                email: doc.email
+            };
+            const refreshToken = jwt.sign(user, config.myprivatekey, { expiresIn: 0});
+            res.json({"message": "Logout"});
+        }
+    })
+});
+
+//Only status should be updated from agreement record
 router.put('/updateagreement/:agreementid', (req, res) => {
+    console.log(report._id);
+    var reportId = report._id;
     if (!req.body.buyer || !req.body.report) {
         return res.status(400).json({
             message: 'Please fill out all fields'
@@ -582,6 +765,34 @@ router.put('/updateagreement/:agreementid', (req, res) => {
                     message: "error"
                 });
         } else {
+            request.put({
+                headers: {
+                    "content-type": "application/json"
+                },
+                url: blockchainConfig.url + "/org.example.biznet.MedicalRecord/" + req.param(reportId),
+                body: JSON.stringify({
+                    $class: "org.example.biznet.MedicalRecord",
+                    "description": req.body.diagnosis,
+                    "cancerType": req.body.cancertype,
+                    "medicalHistory": req.body.reporttype,
+                    "patientIdd": req.body.patient,
+                    "hospitalIdd": req.body.hospital,
+                    "buyers": req.body.buyer
+                })
+            }, (error, response, body) => {
+                if (error) {
+                    console.log("MedicalRecord update FAILED To Blockchain.");
+                    // res.json({
+                    success: false
+                    // message: "record failed."
+                    //});
+                }
+                // res.json({
+                success: true
+                console.log("MedicalRecord updated IN  Blockchain successfully.")
+                //   message: "Patient Added To Blockchain successfully."
+                //});
+            });
             res.send({
                 message: "agreement updated"
             }).status(200);
@@ -608,14 +819,23 @@ router.delete('/deleteagreement/:agreementid', (req, res) => {
         });
 });
 
-// get all agreements  details of the buyer from database ///parag give hospital from report
+// get all agreements  details of the buyer from database 
 router.get('/agreementbybuyer/:buyerid', function (req, res, next) {
     var reportarray = [];
     console.log("inside getallagreementbybuyer method");
-
     agreement.find({
         buyer: req.param("buyerid")
-    }).populate('report').exec(function (err, agreementDetails) {
+    }).populate([{
+        path: 'report',
+        populate: {
+            path: 'patient'
+        }
+    }]).populate([{
+        path: 'report',
+        populate: {
+            path: 'hospital'
+        }
+    }]).exec(function (err, agreementDetails) {
         if (err) {
             return next(err);
         } else {
@@ -849,7 +1069,7 @@ router.get('/reportbyhospital/:hospitalid', function (req, res, next) {
 
     report.find({
         hospital: req.param("hospitalid")
-    }).populate('hospital').exec(function (err, hospitaldetails) {
+    }).populate('hospital').populate('patient').exec(function (err, hospitaldetails) {
         if (err) {
             return next(err);
         } else {

@@ -1,4 +1,4 @@
 
 module.exports = {
-    url: 'http://3.15.181.193:3000/api'
+    url: 'http://18.191.129.98:3000/api'
 }
