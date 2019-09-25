@@ -41,8 +41,11 @@ router.post('/login', function (req, res) {
         'password': req.body.password
     }).then(function (doc) {
         if (!doc) {
-            throw new Error('No record found.');
-            console.log(doc);
+            return res.status(400).json({
+                message: 'No Record Found'
+            });
+            // throw new Error('No record found.');
+            //console.log(doc);
         } else {
             if (doc.usertype == "patient") {
                 console.log('inside patient method');
@@ -82,8 +85,6 @@ router.post('/login', function (req, res) {
             }
         }
     })
-
-
 });
 
 router.post('/registration', (req, res, next) => {
@@ -91,7 +92,6 @@ router.post('/registration', (req, res, next) => {
     // console.log(req.body.username);
     // console.log(req.body.password);
     // console.log(req.body.email);
-
 
     if (!req.body.username || !req.body.password) {
         return res.status(400).json({
@@ -718,10 +718,12 @@ router.post('/createagreement', (req, res, next) => {
 
 router.post('/logout', function (req, res) {
     console.log(req.body.username);
-    if(!req.body.username){
-      return res.status(400).json({message: 'Please provide name'});
+    if (!req.body.username) {
+        return res.status(400).json({
+            message: 'Please provide name'
+        });
     }
-    
+
     user.findOne({
         'username': req.body.username
     }).then(function (doc) {
@@ -734,50 +736,69 @@ router.post('/logout', function (req, res) {
                 name: doc.name,
                 email: doc.email
             };
-            const refreshToken = jwt.sign(user, config.myprivatekey, { expiresIn: 0});
-            res.json({"message": "Logout"});
+            const refreshToken = jwt.sign(user, config.myprivatekey, {
+                expiresIn: 0
+            });
+            res.json({
+                "message": "Logout"
+            });
         }
     })
 });
 
-//Only status should be updated from agreement record
-router.put('/updateagreement/:agreementid', (req, res) => {
-    console.log(report._id);
-    var reportId = report._id;
-    if (!req.body.buyer || !req.body.report) {
-        return res.status(400).json({
-            message: 'Please fill out all fields'
-        });
-    }
 
-    agreement.updateOne({
-        _id: req.param("agreementid")
-    }, {
-        status: req.body.status,
-        buyer: req.body.buyer,
-        report: req.body.report
+async function getbuyerdetails(id,reportid,req,res){
+ 
+    console.log("inside getbuyer")
+     await buyer.findOne({
+         _id: id,
+         
+     }, function (err, buyerDetails) {
+         if (err) {
+            console.log(err)
+         } else {
+             console.log("buyer detailsssssssssssssssssssss"+buyerDetails)
+             getmedicaldetails(reportid,req,buyerDetails,res);
+         }
+     });
+ }
+array = [];
+async function getmedicaldetails(reportid, req, buyerDetails, res) {
+    request(blockchainConfig.url + '/org.example.biznet.MedicalRecord/' + reportid, function (error, response, body) {
+        console.log("inside getmedicalreport 111")
+        if (!error && response.statusCode == 200) {
+            console.log("inside getmedicalreport")
+            jbody = JSON.parse(body)
+            console.log(jbody.patientIdd)
 
-    }, function (err, data) {
-        if (err) {
-            res
-                .status(400)
-                .send({
-                    message: "error"
-                });
-        } else {
+
+            vararray = jbody.buyers;
+            console.log(reportid)
+            array.push({
+                $class: "org.example.biznet.Buyer",
+                "buyerId": req.body.buyer,
+                "name": buyerDetails.name
+            })
+
+            console.log(array)
+
+
+
             request.put({
                 headers: {
                     "content-type": "application/json"
                 },
-                url: blockchainConfig.url + "/org.example.biznet.MedicalRecord/" + req.param(reportId),
+                url: blockchainConfig.url + "/org.example.biznet.MedicalRecord/" + reportid,
+
                 body: JSON.stringify({
                     $class: "org.example.biznet.MedicalRecord",
-                    "description": req.body.diagnosis,
-                    "cancerType": req.body.cancertype,
-                    "medicalHistory": req.body.reporttype,
-                    "patientIdd": req.body.patient,
-                    "hospitalIdd": req.body.hospital,
-                    "buyers": req.body.buyer
+                    "description": "sdfsf",
+                    "cancerType": body.cancertype,
+                    "medicalHistory": body.reporttype,
+                    "buyers": array,
+                    "patientIdd": body.patient,
+                    "hospitalIdd": body.hospital
+
                 })
             }, (error, response, body) => {
                 if (error) {
@@ -798,7 +819,43 @@ router.put('/updateagreement/:agreementid', (req, res) => {
             }).status(200);
         }
     });
+
+}
+
+
+//Only status should be updated from agreement record
+router.put('/updateagreement/:agreementid', (req, res) => {
+    console.log(report._id);
+    varreportId = report._id;
+    if (!req.body.buyer || !req.body.report) {
+        returnres.status(400).json({
+            message: 'Please fill out all fields'
+        });
+    }
+
+    agreement.updateOne({
+        _id: req.param("agreementid")
+    }, {
+        status: req.body.status,
+        buyer: req.body.buyer,
+        report: req.body.report
+
+    }, function (err, data) {
+        if (err) {
+            res
+                .status(400)
+                .send({
+                    message: "error"
+                });
+        } else {
+
+            getbuyerdetails(req.body.buyer, req.body.report, req, res);
+
+        }
+    });
 });
+
+
 
 router.delete('/deleteagreement/:agreementid', (req, res) => {
     agreement.deleteOne({
