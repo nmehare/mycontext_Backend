@@ -7,7 +7,7 @@ var cookieParser = require('cookie-parser');
 var path = require('path');
 var routes = require('./routes/users');
 //npm run dev----------------------run using this command
-// create express app
+// create express APP
 const app = express();
 app.use(cors());
 //app.use(favicon(__dirname + '/public/images/favicon.ico'));
